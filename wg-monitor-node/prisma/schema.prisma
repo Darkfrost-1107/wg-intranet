@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String      @id @default(uuid())
+  email String      @unique
+  username  String?
+  password String
+
+  // Diferent User Roles
+  client Client?
+  monitor Monitor?
+  provider Provider?
+
+  roles UserRoles[] @default([USER])
+}
+
+enum UserRoles {
+  SUPERADMIN
+  MONITOR
+  USER
+}
+
+model Client {
+  id String @id @default(uuid())
+  user User @relation(fields: [userId], references: [id])
+  userId String @unique
+  
+  // Nodes Managed by the client
+  services ClientNode[]
+}
+
+model ClientNode {
+  id String @id @default(uuid())
+  name String
+
+  // Wireguard Node Configuration
+  address String
+  interfaceName String @default("wg0")
+  sharedNetwork String?
+  nodeType ClientNodeType
+  
+  // Wireguard Keys
+  privateKey String
+  publicKey String
+  presharedKey String
+
+  // Network Connection
+  gateway ProviderNode? @relation(fields: [gatewayId], references: [id])
+  gatewayId String
+
+  // Node Status
+  enabled Boolean @default(true)
+
+  // Owner
+  owner   Client @relation(fields: [ownerId], references: [id])
+  ownerId String
+}
+
+enum ClientNodeType {
+  CLIENT
+  GATEWAY
+  ROUTER
+}
+
+model Monitor {
+  id String @id @default(uuid())
+  user User @relation(fields: [userId], references: [id])
+  userId String @unique
+}
+
+model Provider {
+  id String @id @default(uuid())
+  user User @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  services ProviderNode[]
+}
+
+
+model ProviderNode {
+  id String @id @default(uuid())
+  name String
+  
+  // Wireguard Node Configuration
+  interfaceName String @default("wg0")
+  publicAddress String
+  addressInterface String  
+
+  // Wireguard Keys
+  privateKey String
+  publicKey String
+  presharedKey String
+  
+  // Owner
+  owner   Provider @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  // Networks
+  clients ClientNode[]
+  networkConnections NetworkConection[] @relation("NetworkToSource")
+  networkSources NetworkConection[] @relation("NetworkToDestination")
+}
+
+model NetworkConection {
+  source ProviderNode @relation("NetworkToSource", fields: [sourceId], references: [id])
+  sourceId String
+  destination ProviderNode @relation("NetworkToDestination", fields: [destinationId], references: [id])
+  destinationId String
+  flow ConectionFlow
+
+  @@id([sourceId, destinationId])
+}
+
+enum ConectionFlow {
+  UNIDIRECTIONAL
+  BIDIRECTIONAL
+}
+
+enum ProviderNodeType {
+  ROUTER
+  REPEATER
+  GATEWAY
+}
