@@ -106,6 +106,7 @@ async function basicAuth(req, res, next){
   const {username, password} = req.body;
   const pw = crypto.SHA256(password).toString()
 
+  console.log(password, " : ",pw)
   const user = await client.findFirst({
     where: {username, password:pw },
     omit: {

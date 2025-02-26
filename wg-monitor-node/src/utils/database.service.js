@@ -20,15 +20,31 @@ const adapter = new PrismaPg(pool)
  * [Pendiente | TODO]:
  * - [ ] Reconsiderar, si debería quedar como factory o convertirlo a un singleton
  */
+
+const crypto = require('crypto-js');
+
 function CreateClient(){
   return new PrismaClient({adapter});
 }
 
+function CreateSuperUser({username, password}){
+  const client = CreateClient().user;
+
+  const pw = crypto.SHA256(password).toString();
+  const user = client.create({
+    data: {
+      username,
+      password,
+      roles: ["SUPERADMIN", "USER"]
+    }
+  });
+}
 async function CloseClient(client){
   await client.$disconnect();
 }
 
 global.db = {
   CreateClient,
-  CloseClient
+  CloseClient,
+  CreateSuperUser,
 }
