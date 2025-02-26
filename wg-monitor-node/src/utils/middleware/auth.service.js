@@ -1,5 +1,17 @@
+/**
+ * @file auth.service.js
+ * @description Servicio de autenticación
+ * Resumen de todo lo relacionado a la autenticación 
+ */
+
 const crypto = require('crypto-js');
 
+/**
+ * Middleware de autenticación por sesion
+ * 
+ * # [Pendiente | TODO]:
+ * - [ ] Cambiarle el nombre a la función a sessionAuth
+ */
 function authMiddleWare(req, res, next) {
   const { user } = req.session;
   if (!user || !user.authenticated) {
@@ -11,6 +23,10 @@ function authMiddleWare(req, res, next) {
   }
   next();
 }
+
+/**
+ * Middleware de autenticación por roles (INCLUSION)
+ */
 
 function includeRoles(allowedRoles) {
   return (req, res, next) => {
@@ -31,6 +47,9 @@ function includeRoles(allowedRoles) {
   }
 }
 
+/**
+ * Middleware de autenticación por roles (EXCLUSION)
+ */
 function excludeRoles(excludedRoles) {
   return (req, res, next) => {
     const { roles } = req.session.user;
@@ -49,6 +68,9 @@ function excludeRoles(excludedRoles) {
   }
 }
 
+/**
+ * Middleware de autenticación por propiedad de ownership a los recursos
+ */
 function hasOwnership(req, res, next){
   const { user } = req.session;
   const { id, owner } = req.params;
@@ -71,9 +93,16 @@ function hasOwnership(req, res, next){
   });
 }
 
+/**
+ * Middleware de autenticación básica
+ * 
+ * * Ideal para login de usuarios
+ * * Se recomienda usar con HTTPS
+ */
+
 async function basicAuth(req, res, next){
   const client = db.CreateClient().user
-  
+
   const {username, password} = req.body;
   const pw = crypto.SHA256(password).toString()
 
@@ -98,10 +127,26 @@ async function basicAuth(req, res, next){
   });
 }
 
+/**
+ * Middleware de autenticación por API Token
+ * 
+ * # [Pendiente | TODO]:
+ * - [ ] Cambiar los esquemas de la BD para implementar API Token
+ * - [ ] Implementar la logica de autenticación por API Token
+ */
+async function APIAuth(req, res, next){
+  const client = db.CreateClient().user
+
+  const {username, password} = req.body;
+  next();
+
+}
+
 global.auth = {
   authMiddleWare,
   includeRoles,
   excludeRoles,
   hasOwnership,
   basicAuth,
+  APIAuth,
 }

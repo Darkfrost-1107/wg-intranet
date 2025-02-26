@@ -4,10 +4,11 @@
  * Resumen de todo lo relacionado a la base de datos
  */
 
+const { Pool } = require('pg');
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 const { PrismaPg } = require('@prisma/adapter-pg');
 
+const prisma = new PrismaClient();
 const connectionString = process.env.DATABASE_URL
 
 const pool = new Pool({ connectionString })

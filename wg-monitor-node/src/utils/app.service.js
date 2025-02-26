@@ -1,10 +1,24 @@
+/**
+ * @file app.service.js
+ * @description Configuración de la aplicación
+ * Resumen de todo lo relacionado a la configuración de la aplicación
+ */
 const express = require('express')
 
+/**
+ * Crear una aplicación express
+ */
 function CreateApp () {
   const router = express.Router()
   return {router}
 }
 
+/**
+ * Clase controladora de un servicio CRUD
+ * 
+ * # [Pendiente | TODO]:
+ * - [ ] Reconsiderar si debería mantenerse el patron Factory para los servicios
+ */
 class AppController {
 
   /**
@@ -26,6 +40,7 @@ class AppController {
    * orderBy: ??,
    * omit: [object_param]
    * data: object
+   * include: object
    * }
    * @returns 
    */
@@ -35,17 +50,18 @@ class AppController {
       return await this.db_controller.findMany()
     }
 
-    const { skip, take, cursor, where, orderBy, omit } = params
+    const { skip, take, cursor, where, orderBy, omit, include } = params
     return await this.db_controller.findMany({
-      skip, take, cursor, where, orderBy, omit
+      skip, take, cursor, where, orderBy, omit, include
     })
   }
 
   async find (params) {
-    const { where, omit } = params
+    const { where, omit, include } = params
     return await this.db_controller.findFirst({
       where,
       omit,
+      include,
     })
   }
 
@@ -72,19 +88,22 @@ class AppController {
 }
 
 /**
- * 
- * @param {*} config
- * route-options = "findall, find, create, update, delete"
- * TYPE of config
- * {
- *  [key: route-options]: {
- *    middleware: Function[],
- *    process: Function
- *    url: string
- *  }
- * } 
- * @param {*} db_controller 
- * @returns 
+ * Crear una app a partir de controlador de aplicación
+ * * @param {*} config
+ * * route-options = "findall, find, create, update, delete"
+ * * TYPE of config
+ * * {
+ * *  [key: route-options]: {
+ * *   middleware: Function[],
+ * *   process: Function
+ * *   url: string
+ * *  }
+ * * } 
+ * * @param {*} db_controller 
+ *  
+ * # [Pendiente | TODO]:
+ * - [ ] Sanetizar adecuadamente los parametros
+ * - [ ] Estandarizar los datos que se pasan a los procesadores
  */
 function CreateControllerApp (config, db_controller) {
 
