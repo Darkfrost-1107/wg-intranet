@@ -1,3 +1,5 @@
+const crypto = require('crypto-js');
+
 function authMiddleWare(req, res, next) {
   const { user } = req.session;
   if (!user || !user.authenticated) {
@@ -69,9 +71,37 @@ function hasOwnership(req, res, next){
   });
 }
 
+async function basicAuth(req, res, next){
+  const client = db.CreateClient().user
+  
+  const {username, password} = req.body;
+  const pw = crypto.SHA256(password).toString()
+
+  const user = await client.findFirst({
+    where: {username, password:pw },
+    omit: {
+      password: true
+    }
+  })
+  if(user){
+    req.session.user = { ...user,
+      authenticated: true,
+    };
+    next();
+    return;
+  }
+
+  res.status(403).json({
+    detail: 'NotAuthenticated',
+    authenticated: false,
+    authorized: false,
+  });
+}
+
 global.auth = {
   authMiddleWare,
   includeRoles,
   excludeRoles,
-  hasOwnership
+  hasOwnership,
+  basicAuth,
 }
