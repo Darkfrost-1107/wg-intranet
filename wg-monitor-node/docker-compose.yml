@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: my_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: Ginger_Ale
+      POSTGRES_PASSWORD: Ginpachi_110705
+      POSTGRES_DB: monitor_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
