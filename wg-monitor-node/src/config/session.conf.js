@@ -6,11 +6,12 @@
 
 const session = require('express-session');
 const SQLiteStore = require("connect-sqlite3")(session);
-
+const csrf = require('csurf');
 function addSession(app) {
 
   // Secret para encriptar las sess_id
   const secret = "SECRET-KEY-WTF"
+  const csrfProtection = csrf({ cookie: true }); // CSRF Protection
 
   /**
    * Configuración de las sesiones
@@ -26,10 +27,21 @@ function addSession(app) {
     resave: false,
     saveUninitialized: true,
     cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+
       // Tiempo de vida de la session : 1 día
       maxAge: 1 * 24 * 60 * 60 * 1000
-    }
-  }))
+    },
+    rolling: true
+  }));
+
+app.use(csrfProtection); // CSRF Protection
+
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();  // El token CSRF se puede acceder en las vistas
+  next();
+});
 }
 
 module.exports = {

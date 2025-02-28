@@ -139,6 +139,5 @@ const validateData = (schema) => (req, res, next) => {
 module.exports = {
     providerNodeSchema,
     clientNodeSchema ,
-    createUpdateSchema,
     validateData
 };
