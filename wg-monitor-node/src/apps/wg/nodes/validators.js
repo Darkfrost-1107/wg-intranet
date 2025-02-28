@@ -51,15 +51,15 @@ const providerNodeSchema = Joi.object({
     'string.ip': 'La dirección de la interfaz debe ser una dirección IP válida.',
 
   }),
-  privateKey: Joi.string().messages({
+  privateKey: Joi.forbidden().messages({
     'string.base': 'La clave privada debe ser una cadena de texto.',
 
   }),
-  publicKey: Joi.string().messages({
+  publicKey: Joi.forbidden().messages({
     'string.base': 'La clave pública debe ser una cadena de texto.',
 
   }),
-  presharedKey: Joi.string().messages({
+  presharedKey: Joi.forbidden().messages({
     'string.base': 'La clave precompartida debe ser una cadena de texto.',
   })
 });
@@ -88,28 +88,28 @@ const clientNodeSchema = Joi.object({
   nodeType: Joi.string().valid('CLIENT', 'GATEWAY', 'ROUTER').messages({
     'any.only': 'El tipo de nodo debe ser CLIENT, GATEWAY o ROUTER.',
   }),
-  privateKey: Joi.string().messages({
+  privateKey: Joi.forbidden().messages({
     'string.base': 'La clave privada debe ser una cadena de texto.',
 
   }),
-  publicKey: Joi.string().messages({
+  publicKey: Joi.forbidden().messages({
     'string.base': 'La clave pública debe ser una cadena de texto.',
 
   }),
-  presharedKey: Joi.string().messages({
+  presharedKey: Joi.forbidden().messages({
     'string.base': 'La clave precompartida debe ser una cadena de texto.',
 
   }),
-  gatewayId: Joi.string().uuid().messages({
-    'string.base': 'El ID del gateway debe ser un UUID.',
+  gatewayId: Joi.forbidden().messages({
+    'forbidden.base': 'El ID del gateway no puede ser modificado.',
 
   }),
   enabled: Joi.boolean().default(true).messages({
     'boolean.base': 'El estado de habilitación debe ser un valor booleano.',
   
   }),
-  ownerId: Joi.string().uuid().messages({
-    'string.base': 'El ID del propietario debe ser un UUID.',
+  ownerId: Joi.forbidden().messages({
+    'forbidden.base': 'El ID del propietario no puede ser modificado.',
 
   })
 });
