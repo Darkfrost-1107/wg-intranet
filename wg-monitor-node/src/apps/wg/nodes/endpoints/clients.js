@@ -1,24 +1,26 @@
+const { clientNodeSchema, validateData } = require('../validators');
+
 const {router, controller} = app.CreateControllerApp({
   findall: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"])],
     process: (query) => query
   },
   find: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
     process: (params) => params,
     url: "/:owner/:id",
   },
   create: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"]),validateData(clientNodeSchema)],
     process: (body) => body
   },
   update: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership,  validateData(clientNodeSchema)],
     process: (body) => body,
     url: "/:owner/:id"
   },
   delete: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"])],
     process: (params) => params
   }
 }, db.CreateClient().clientNode)
@@ -55,8 +57,45 @@ async function getWgClientConfig(req, res){
 
 router.get("/:owner/:id/getConfig", [auth.hasOwnership], getWgClientConfig)
 router.post("/:owner/:id/getConfig", [auth.APIAuth], getWgClientConfig)
+router.post("/:owner/:id/generateKeys", [auth.sessionAuth, auth.includeRoles(["USER"]), auth.hasOwnership], async (req, res) => {
+  const {owner, id} = req.params;
+  const client = await controller.find({
+    where: {
+      id,
+      owner: {
+        is: {
+          id: owner
+        }
+      }
+    }
+  })
+  const {privateKey, publicKey, presharedKey} = await wg.WgGenerateKeys() 
+  const result = await controller.update({
+    where: {
+      id,
+      owner: {
+        is: {
+          id: owner
+        }
+      }
+    },
+    data: {
+      privateKey,
+      publicKey,
+      presharedKey
+    }
+     })
+    res.json({
+      detail: "Generated Keys",
+      data : result,
+    })
 
-router.post("/:owner/:id/assignGateway", [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership], async (req, res) => {
+  })
+
+
+  
+
+router.post("/:owner/:id/assignGateway", [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership], async (req, res) => {
   const {owner, id} = req.params;
   const {gatewayId} = req.body;
   if(gatewayId === undefined){

@@ -9,10 +9,11 @@ const crypto = require('crypto-js');
 /**
  * Middleware de autenticación por sesion
  * 
- * # [Pendiente | TODO]:
- * - [ ] Cambiarle el nombre a la función a sessionAuth
- */
-function authMiddleWare(req, res, next) {
+*/
+
+
+
+function sessionAuth(req, res, next) {
   const { user } = req.session;
   if (!user || !user.authenticated) {
     res.status(401).json({
@@ -128,23 +129,36 @@ async function basicAuth(req, res, next){
   });
 }
 
-/**
- * Middleware de autenticación por API Token
- * 
- * # [Pendiente | TODO]:
- * - [ ] Cambiar los esquemas de la BD para implementar API Token
- * - [ ] Implementar la logica de autenticación por API Token
- */
+
 async function APIAuth(req, res, next){
   const client = db.CreateClient().user
 
-  const {username, password} = req.body;
-  next();
-
-}
+  const{apiToken} = req.headers;
+  const user = await client.findFirst({
+    where:
+    {
+      apiToken
+    },
+    omit: {
+      password: true
+    }
+  });
+  if(user){
+    req.session.user = { ...user,
+      authenticated: true,
+    };
+    next();
+    return;
+  }
+  res.status(403).json({
+    detail: 'NotAuthenticated',
+    authenticated: false,
+    authorized: false,
+  });
+}  
 
 global.auth = {
-  authMiddleWare,
+  sessionAuth,
   includeRoles,
   excludeRoles,
   hasOwnership,

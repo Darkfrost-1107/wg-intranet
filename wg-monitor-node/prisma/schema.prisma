@@ -19,11 +19,15 @@ model User {
   email String      @unique
   username  String?
   password String
+  // apiToken String?  @unique
 
   // Diferent User Roles
   client Client?
   monitor Monitor?
   provider Provider?
+
+  apiToken ApiToken?
+  
 
   roles UserRoles[] @default([USER])
 }
@@ -31,7 +35,7 @@ model User {
 enum UserRoles {
   SUPERADMIN
   MONITOR
-  USER
+  USER 
 }
 
 model Client {
@@ -50,6 +54,7 @@ model ClientNode {
   // Wireguard Node Configuration
   address String
   interfaceName String @default("wg0")
+  outerInterfaceName String @default("eth0")
   sharedNetwork String?
   nodeType ClientNodeType
   
@@ -94,11 +99,18 @@ model Provider {
 model ProviderNode {
   id String @id @default(uuid())
   name String
-  
+  listenPort Int @default(51820) 
+  dns String?
+  mtu Int @default(1420)
+  allowedIPs String?
+  outerInterfaceName String 
+  networkSegment String 
+   access ProviderAccess @default(PUBLIC)
+
   // Wireguard Node Configuration
   interfaceName String @default("wg0")
   publicAddress String
-  addressInterface String  
+  interfaceAddress String  
 
   // Wireguard Keys
   privateKey String
@@ -110,10 +122,15 @@ model ProviderNode {
   ownerId String
 
   // Networks
+  
   clients ClientNode[]
   networkConnections NetworkConection[] @relation("NetworkToSource")
   networkSources NetworkConection[] @relation("NetworkToDestination")
 }
+
+
+
+
 
 model NetworkConection {
   source ProviderNode @relation("NetworkToSource", fields: [sourceId], references: [id])
@@ -123,7 +140,20 @@ model NetworkConection {
   flow ConectionFlow
 
   @@id([sourceId, destinationId])
+
 }
+
+model ApiToken {
+  id String     @id @default(uuid())
+  token String  @unique 
+  user User     @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  revoked Boolean @default(false)
+}
+
 
 enum ConectionFlow {
   UNIDIRECTIONAL
@@ -134,4 +164,9 @@ enum ProviderNodeType {
   ROUTER
   REPEATER
   GATEWAY
+}
+
+enum ProviderAccess {
+  PUBLIC
+  PRIVATE
 }

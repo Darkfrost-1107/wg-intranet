@@ -1,8 +1,9 @@
 const crypt = require("crypto-js");
+const uuid = require("uuid")
 
-const {router} = app.CreateControllerApp({
+const {router, controller} = app.CreateControllerApp({
   findall: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"])],
     process: (query) => {
       return { ...query,
         omit: {
@@ -12,7 +13,7 @@ const {router} = app.CreateControllerApp({
     }
   },
   find: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
     process: (params) => {
       return { ...params,
         omit: {
@@ -22,7 +23,7 @@ const {router} = app.CreateControllerApp({
     },
   },
   create: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"])],
     process: (body) => {
       const {data} = body
       if(!data.username || !data.email || !data.password) {
@@ -35,13 +36,42 @@ const {router} = app.CreateControllerApp({
     }
   },
   update: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
     process: (body) => body
   },
   delete: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"])],
     process: (params) => params
   }
 }, db.CreateClient().user)
+
+router.get("/:id/getApiToken", [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership], async (req, res) => {
+  
+})
+
+router.post("/:id/generateApiToken", [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership], async (req, res) => {
+  const { id } = req.params;
+
+  const token = uuid.v4()
+  const user = await controller.update({
+    where: { id },
+    data: {
+      apiToken: {
+        create: {
+          token
+        }
+      }
+    }
+  })
+
+  res.json({
+    detail: "Generated Token",
+    token
+  })
+})
+
+router.delete("/:id/deleteApiToken", [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership], async (req, res) => {
+
+})
 
 module.exports = router;

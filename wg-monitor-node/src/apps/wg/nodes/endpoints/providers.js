@@ -1,24 +1,33 @@
+const { providerNodeSchema, validateData } = require('../validators');
+
 const {router, controller} = app.CreateControllerApp({
   findall: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"])],
     process: (query) => query
   },
   find: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
     process: (params) => params,
     url: "/:owner/:id",
   },
+
+
   create: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
-    process: (body) => body
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"]),validateData(providerNodeSchema)],
+
+    process: (body) => {body}
   },
+
   update: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership],
-    process: (body) => body,
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership, validateData(providerNodeSchema)],
+    process: (body) => {body},
     url: "/:owner/:id"
   },
+
+
+
   delete: {
-    middleware: [auth.authMiddleWare, auth.includeRoles(["SUPERADMIN"])],
+    middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN"])],
     process: (params) => params
   }
 }, db.CreateClient().providerNode)
@@ -55,5 +64,39 @@ async function getWgProviderConfig(req, res){
 
 router.get("/:owner/:id/getConfig", [auth.hasOwnership], getWgProviderConfig)
 router.post("/:owner/:id/getConfig", [auth.APIAuth], getWgProviderConfig)
+router.post("/:owner/:id/generateKeys", [auth.sessionAuth, auth.includeRoles(["USER"]), auth.hasOwnership], async (req, res) => {
+  const {owner, id} = req.params;
+  const client = await controller.find({
+    where: {
+      id,
+      owner: {
+        is: {
+          id: owner
+        }
+      }
+    }
+  })
+  const {privateKey, publicKey, presharedKey} = await wg.WgGenerateKeys() 
+  const result = await controller.update({
+    where: {
+      id,
+      owner: {
+        is: {
+          id: owner
+        }
+      }
+    },
+    data: {
+      privateKey,
+      publicKey,
+      presharedKey
+    }
+     })
+    res.json({
+      detail: "Generated Keys",
+      data : result,
+    })
 
+  })
+  
 module.exports = router;
