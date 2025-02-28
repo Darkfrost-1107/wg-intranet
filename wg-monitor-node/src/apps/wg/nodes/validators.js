@@ -28,44 +28,39 @@ const providerNodeSchema = Joi.object({
   allowedIPs: Joi.string().optional().messages({
     'string.base': 'La lista de direcciones IP permitidas debe ser una cadena de texto.'
   }),
-  outerInterfaceName: Joi.string().required().min(3).max(50).messages({
+  outerInterfaceName: Joi.string().min(3).max(50).messages({
     'string.base': 'El nombre de la interfaz externa debe ser una cadena de texto.',
     'string.min': 'El nombre de la interfaz externa debe tener al menos 3 caracteres.',
     'string.max': 'El nombre de la interfaz externa no puede superar los 50 caracteres.',
-    'any.required': 'El nombre de la interfaz externa es obligatorio.'
   }),
-  networkSegment: Joi.string().required().messages({
+  networkSegment: Joi.string().messages({
     'string.base': 'El segmento de red debe ser una cadena de texto.',
-    'any.required': 'El segmento de red es obligatorio.'
   }),
   access: Joi.string().valid('PUBLIC', 'PRIVATE').default('PUBLIC').messages({
     'any.only': 'El acceso debe ser "PUBLIC" o "PRIVATE".'
   }),
-  interfaceName: Joi.string().required().default('wg0').messages({
+  interfaceName: Joi.string().default('wg0').messages({
     'string.base': 'El nombre de la interfaz debe ser una cadena de texto.',
-    'any.required': 'El nombre de la interfaz es obligatorio.'
   }),
-  publicAddress: Joi.string().ip().required().messages({
+  publicAddress: Joi.string().ip().messages({
     'string.base': 'La dirección pública debe ser una dirección IP válida.',
     'string.ip': 'La dirección pública debe ser una dirección IP válida.',
-    'any.required': 'La dirección pública es obligatoria.'
   }),
-  interfaceAddress: Joi.string().ip().required().messages({
+  interfaceAddress: Joi.string().ip().messages({
     'string.base': 'La dirección de la interfaz debe ser una dirección IP válida.',
     'string.ip': 'La dirección de la interfaz debe ser una dirección IP válida.',
-    'any.required': 'La dirección de la interfaz es obligatoria.'
+
   }),
-  privateKey: Joi.string().required().messages({
+  privateKey: Joi.string().messages({
     'string.base': 'La clave privada debe ser una cadena de texto.',
-    'any.required': 'La clave privada es obligatoria.'
+
   }),
-  publicKey: Joi.string().required().messages({
+  publicKey: Joi.string().messages({
     'string.base': 'La clave pública debe ser una cadena de texto.',
-    'any.required': 'La clave pública es obligatoria.'
+
   }),
-  presharedKey: Joi.string().required().messages({
+  presharedKey: Joi.string().messages({
     'string.base': 'La clave precompartida debe ser una cadena de texto.',
-    'any.required': 'La clave precompartida es obligatoria.'
   })
 });
 
@@ -77,49 +72,45 @@ const clientNodeSchema = Joi.object({
     'string.max': 'El nombre no puede tener más de 100 caracteres.',
     'any.required': 'El nombre es obligatorio.'
   }),
-  address: Joi.string().ip().required().messages({
+  address: Joi.string().ip().messages({
     'string.base': 'La dirección IP debe ser una cadena de texto.',
     'string.ip': 'La dirección IP debe ser válida.',
-    'any.required': 'La dirección IP es obligatoria.'
   }),
   interfaceName: Joi.string().default('wg0').messages({
     'string.base': 'El nombre de la interfaz debe ser una cadena de texto.',
-    'any.required': 'El nombre de la interfaz es obligatorio.'
   }),
   outerInterfaceName: Joi.string().default('eth0').messages({
     'string.base': 'El nombre de la interfaz externa debe ser una cadena de texto.',
-    'any.required': 'El nombre de la interfaz externa es obligatorio.'
   }),
-  sharedNetwork: Joi.string().optional().messages({
+  sharedNetwork: Joi.string().allow(null).optional().messages({
     'string.base': 'La red compartida debe ser una cadena de texto.'
   }),
-  nodeType: Joi.string().valid('CLIENT', 'GATEWAY', 'ROUTER').required().messages({
+  nodeType: Joi.string().valid('CLIENT', 'GATEWAY', 'ROUTER').messages({
     'any.only': 'El tipo de nodo debe ser CLIENT, GATEWAY o ROUTER.',
-    'any.required': 'El tipo de nodo es obligatorio.'
   }),
-  privateKey: Joi.string().required().messages({
+  privateKey: Joi.string().messages({
     'string.base': 'La clave privada debe ser una cadena de texto.',
-    'any.required': 'La clave privada es obligatoria.'
+
   }),
-  publicKey: Joi.string().required().messages({
+  publicKey: Joi.string().messages({
     'string.base': 'La clave pública debe ser una cadena de texto.',
-    'any.required': 'La clave pública es obligatoria.'
+
   }),
-  presharedKey: Joi.string().required().messages({
+  presharedKey: Joi.string().messages({
     'string.base': 'La clave precompartida debe ser una cadena de texto.',
-    'any.required': 'La clave precompartida es obligatoria.'
+
   }),
-  gatewayId: Joi.string().uuid().required().messages({
+  gatewayId: Joi.string().uuid().messages({
     'string.base': 'El ID del gateway debe ser un UUID.',
-    'any.required': 'El ID del gateway es obligatorio.'
+
   }),
   enabled: Joi.boolean().default(true).messages({
     'boolean.base': 'El estado de habilitación debe ser un valor booleano.',
-    'any.required': 'El estado de habilitación es obligatorio.'
+  
   }),
-  ownerId: Joi.string().uuid().required().messages({
+  ownerId: Joi.string().uuid().messages({
     'string.base': 'El ID del propietario debe ser un UUID.',
-    'any.required': 'El ID del propietario es obligatorio.'
+
   })
 });
 
