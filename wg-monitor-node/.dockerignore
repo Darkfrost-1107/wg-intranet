@@ -1,0 +1,13 @@
+node_modules
+run_*.sh
+git_add_commit_push*.sh
+backup_db*.sh
+env.example
+.git/
+.gitignore
+.gitlab-ci.yml
+Dockerfile
+docker-compose*.yml
+README.md
+backups/
+.vscode
