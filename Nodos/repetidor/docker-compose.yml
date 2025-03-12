@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+
+
+  repetidor:
+    image: node:20-alpine
+    container_name: wireguard-repeater
+    restart: always
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./config:/app/config
+    networks:
+      - wg-net
+    command: sh -c "/app/configurar_red.sh repetidor && npm start"
+
+networks:
+  wg-net:
+    driver: bridge

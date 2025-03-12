@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  wireguard:
+    image: node:20-alpine
+    container_name: wireguard-container
+    restart: always
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./config:/app/config  # Montar la carpeta con las configuraciones de WireGuard
+    ports:
+      - "51820:51820/udp"     # Puerto para WireGuard
+      - "3000:3000"           # Puerto para la aplicación Node.js
+    networks:
+      - wg-net
+    command: sh -c "/app/configurar_red.sh servidor && npm start"
+
+networks:
+  wg-net:
+    driver: bridge
