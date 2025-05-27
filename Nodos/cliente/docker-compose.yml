@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  cliente:
+    image: node:20-alpine
+    container_name: wireguard-client
+    restart: always
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./config:/app/config
+    ports:
+      - "3001:3000"           # Puerto de la app Node.js cliente
+    networks:
+      - wg-net
+    command: sh -c "/app/configurar_red.sh usuario && npm start"
+
+
+networks:
+  wg-net:
+    driver: bridge
