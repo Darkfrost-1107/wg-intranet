@@ -151,7 +151,8 @@ function CreateControllerApp (config, db_controller) {
     config.update?.url ?? '/:id', 
     config.update?.middleware ?? [] , 
     async (req, res) => {
-      const params = config.update?.process(req.body, req) ?? {...req.body, where: req.params}
+      let body = {data: req.body, where: req.params}
+      const params = config.update?.process(body, req) ?? body
       const result = await controller.update(params)
       res.json({
         detail: "Updated",

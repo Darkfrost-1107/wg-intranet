@@ -11,7 +11,8 @@ function addSession(app) {
 
   // Secret para encriptar las sess_id
   const secret = "SECRET-KEY-WTF"
-  const csrfProtection = csrf({ cookie: true }); // CSRF Protection
+  // # GGs
+  // const csrfProtection = csrf({ cookie: true }); // CSRF Protection
 
   /**
    * Configuración de las sesiones
@@ -35,14 +36,16 @@ function addSession(app) {
     },
     rolling: true
   }));
-
-app.use(csrfProtection); // CSRF Protection
-
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();  // El token CSRF se puede acceder en las vistas
-  next();
-});
-}
+  
+  // # GGs
+  // app.use(csrfProtection); // CSRF Protection
+  
+  // app.use((req, res, next) => {
+  //   console.log("Hello")
+  //   res.locals.csrfToken = req.csrfToken();  // El token CSRF se puede acceder en las vistas
+  //   next();
+  // });
+  }
 
 module.exports = {
   addSession

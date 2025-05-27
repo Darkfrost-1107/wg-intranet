@@ -16,7 +16,19 @@ const {router, controller} = app.CreateControllerApp({
   },
   update: {
     middleware: [auth.sessionAuth, auth.includeRoles(["SUPERADMIN", "USER"]), auth.hasOwnership,  validateData(clientNodeSchema)],
-    process: (body) => body,
+    process: (body, req) => {
+      return {
+        data: body.data,
+        where: {
+          id: req.params.id,
+          owner: {
+            is: {
+              userId: req.params.owner
+            }
+          }
+        }
+      }
+    },
     url: "/:owner/:id"
   },
   delete: {
